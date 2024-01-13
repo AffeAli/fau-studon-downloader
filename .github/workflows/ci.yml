@@ -49,5 +49,5 @@ jobs:
       with:
         name: Binaries
         path: |
-          target/release/KIT-ILIAS-downloader
-          target/release/KIT-ILIAS-downloader.exe
+          target/release/fau-studon-downloader
+          target/release/fau-studon-downloader.exe

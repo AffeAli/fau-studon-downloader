@@ -1,5 +1,5 @@
 [package]
-name = "KIT-ILIAS-downloader"
+name = "fau-studon-downloader"
 version = "0.3.7"
 authors = ["FliegendeWurst <2012gdwu@posteo.de>"]
 license = "GPL-3.0-or-later"

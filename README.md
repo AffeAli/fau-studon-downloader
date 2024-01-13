@@ -1,11 +1,13 @@
-# KIT-ILIAS-downloader
+# fau-studon-downloader
 
-Download content from ILIAS. That includes:
+Download content from StudOn. That includes:
 
 * files
 * exercise sheets and solutions
-* Opencast lectures
 * forum posts
+
+Forked from [KIT-ILIAS-downloader](https://github.com/FliegendeWurst/KIT-ILIAS-downloader).
+It is possible that some features are broken due to differences in KIT ILIAS and StudOn.
 
 ## Installation
 
@@ -18,7 +20,7 @@ $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 and compile from source:
 ```
-$ cargo install --all-features --git 'https://github.com/FliegendeWurst/KIT-ILIAS-downloader'
+$ cargo install --all-features --git 'https://github.com/AffeAli/fau-studon-downloader'
 ```
 
 ## Usage
@@ -28,23 +30,23 @@ First, open a terminal. Navigate to the directory that contains the downloaded b
 Then execute the program (use `-o <directory>` to specify the download directory):
 
 ```
-$ KIT-ILIAS-downloader -o ./ILIAS
+$ fau-studon-downloader -o ./StudOn
 ```
 
-By default, only content on your [personal desktop](https://ilias.studium.kit.edu/ilias.php?baseClass=ilPersonalDesktopGUI&cmd=jumpToSelectedItems) will be downloaded.  
-Use the `--sync-url` option to download a specific page and its sub-pages: (the URL should be copied from an ILIAS link, not the browser URL bar)
+By default, only content on your [personal desktop](https://studon.fau.de/studon/ilias.php?baseClass=ilDashboardGUI&cmd=jumpToMemberships) will be downloaded.  
+Use the `--sync-url` option to download a specific page and its sub-pages: (the URL should be copied from an StudOn link, not the browser URL bar)
 
 ```
-$ KIT-ILIAS-downloader -o ./ILIAS/WS2021-HM1 --sync-url 'https://ilias.studium.kit.edu/ilias.php?ref_id=1276968&cmdClass=ilrepositorygui&cmdNode=uk&baseClass=ilRepositoryGUI'
+$ fau-studon-downloader -o ./StudOn/WS2021-HM1 --sync-url 'https://ilias.studium.kit.edu/ilias.php?ref_id=1276968&cmdClass=ilrepositorygui&cmdNode=uk&baseClass=ilRepositoryGUI'
 ```
 
 ### Options
 
 ```
-KIT-ILIAS-downloader 0.3.5
+fau-studon-downloader 0.3.5
 
 USAGE:
-    KIT-ILIAS-downloader [FLAGS] [OPTIONS] --output <output>
+    fau-studon-downloader [FLAGS] [OPTIONS] --output <output>
 
 FLAGS:
         --all                 Download all courses
@@ -89,12 +91,12 @@ OPTIONS:
 
 You can use the `--user` and `--keyring` options to get/store the password using the system password store:
 ```
-$ KIT-ILIAS-downloader -U uabcd --keyring [...]
+$ fau-studon-downloader -U uabcd --keyring [...]
 ```
 
 If you use [pass](https://www.passwordstore.org/), you can use the `--pass-path` option to specify which password store entry to use:
 ```
-$ KIT-ILIAS-downloader -U uabcd --pass-path edu/kit/uskyk [...]
+$ fau-studon-downloader -U uabcd --pass-path edu/kit/uskyk [...]
 ```
 
 You can also save your username and password in a `.iliaslogin` file: (located in the output folder)
@@ -121,11 +123,3 @@ PlatformFailure(Zbus(MethodError("org.freedesktop.DBus.Error.ServiceUnknown", So
 ] })))
 ```
 If you get the above error when activating the `--keyring` option, you need to make sure that your system keyring service (KeePassXC, GNOME Keyring, ...) is running.
-
-## Other useful programs
-
-- https://github.com/Garmelon/PFERD
-- https://github.com/DeOldSax/iliasDownloaderTool
-- https://github.com/brantsch/kit-ilias-fuse
-- https://github.com/Mr-Pine/IliasUploaderUtility (unlike the other tools, this one uploads files)
-- https://github.com/I-Al-Istannen/ilias-tests (unlike the other tools, this one processes "tests")

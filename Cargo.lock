@@ -3,41 +3,6 @@
 version = 3
 
 [[package]]
-name = "KIT-ILIAS-downloader"
-version = "0.3.7"
-dependencies = [
- "anyhow",
- "async-recursion",
- "atty",
- "bytes",
- "cfg-if",
- "colored",
- "cookie_store 0.20.0",
- "ego-tree",
- "futures",
- "futures-channel",
- "futures-util",
- "h2",
- "ignore",
- "indicatif",
- "keyring",
- "once_cell",
- "regex",
- "reqwest",
- "reqwest_cookie_store",
- "rpassword",
- "rprompt",
- "scraper",
- "serde_json",
- "structopt",
- "tempfile",
- "tokio",
- "tokio-util",
- "toml 0.7.8",
- "url",
-]
-
-[[package]]
 name = "addr2line"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -599,6 +564,41 @@ name = "fastrand"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "25cbce373ec4653f1a01a31e8a5e5ec0c622dc27ff9c4e6606eefef5cbbed4a5"
+
+[[package]]
+name = "fau-studon-downloader"
+version = "0.3.7"
+dependencies = [
+ "anyhow",
+ "async-recursion",
+ "atty",
+ "bytes",
+ "cfg-if",
+ "colored",
+ "cookie_store 0.20.0",
+ "ego-tree",
+ "futures",
+ "futures-channel",
+ "futures-util",
+ "h2",
+ "ignore",
+ "indicatif",
+ "keyring",
+ "once_cell",
+ "regex",
+ "reqwest",
+ "reqwest_cookie_store",
+ "rpassword",
+ "rprompt",
+ "scraper",
+ "serde_json",
+ "structopt",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "toml 0.7.8",
+ "url",
+]
 
 [[package]]
 name = "flate2"
