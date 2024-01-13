@@ -55,7 +55,7 @@ pub async fn download(path: &Path, ilias: Arc<ILIAS>, url: &URL) -> Result<()> {
 			continue;
 		}
 		let cells = row.select(&TABLE_CELLS).collect::<Vec<_>>();
-		if cells.len() != 6 {
+		if cells.len() != 7 {
 			warning!(format =>
 				"Warning: {}{} {} {}",
 				"unusual table row (", cells.len(), "cells) in", url.to_string()

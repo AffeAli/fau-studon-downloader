@@ -180,7 +180,6 @@ impl ILIAS {
 		} else if url.starts_with("studon.fau.de") {
 			format!("https://{}", url)
 		} else {
-			log!(0, "BADDDDD");
 			format!("{}{}", ILIAS_URL, url)
 		};
 		for attempt in 1..10 {
