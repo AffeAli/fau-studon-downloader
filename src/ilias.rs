@@ -107,43 +107,37 @@ impl ILIAS {
 			cookies: cookie_store,
 			course_names,
 		};
-		info!("Logging into ILIAS using KIT account..");
-		let session_establishment = this
-			.client
-			.post("https://ilias.studium.kit.edu/Shibboleth.sso/Login")
+		info!("Logging into FAU SSO...");
+		let start_page = this.client.get("https://studon.fau.de/studon/saml.php").send().await?;
+
+		let auth_state = start_page.url().query_pairs().find_map(|e| {
+			if e.0 == "AuthState" {
+				Some(e.1)
+			} else {
+				None
+			}
+		}).ok_or(anyhow!("AuthState missing"))?;
+
+		let login_req = this.client
+			.post("https://www.sso.uni-erlangen.de/simplesaml/module.php/core/loginuserpass.php?")
 			.form(&json!({
-				"sendLogin": "1",
-				"idp_selection": "https://idp.scc.kit.edu/idp/shibboleth",
-				"target": "/shib_login.php?target=",
-				"home_organization_selection": "Mit KIT-Account anmelden"
-			}))
-			.send()
-			.await?;
-		let url = session_establishment.url().clone();
-		let text = session_establishment.text().await?;
-		let dom_sso = Html::parse_document(text.as_str());
-		let csrf_token = dom_sso
-			.select(&Selector::parse(r#"input[name="csrf_token"]"#).unwrap())
-			.next()
-			.context("no CSRF token found")?
-			.value()
-			.attr("value")
-			.context("no CSRF token value")?;
-		info!("Logging into Shibboleth..");
-		let login_response = this
-			.client
-			.post(url)
-			.form(&json!({
-				"j_username": user,
-				"j_password": pass,
-				"_eventId_proceed": "",
-				"csrf_token": csrf_token,
-			}))
-			.send()
-			.await?
-			.text()
-			.await?;
-		let dom = Html::parse_document(&login_response);
+				"username": user,
+				"password": pass,
+				"AuthState": auth_state,
+				}));
+
+		let login_res = login_req.send().await?;
+
+		let dom = Html::parse_document(login_res.text().await?.as_str());
+		let sel = &Selector::parse("form[method=post]").unwrap();
+		let mut forms = dom.select(sel);
+		let post_form = forms.next().context("no post-login form")?;
+		if forms.count() != 0 {
+			return Err(anyhow!("multiple post-login forms"));
+		}
+
+		let post_url = post_form.value().attr("action").context("")?;
+
 		let saml = Selector::parse(r#"input[name="SAMLResponse"]"#).unwrap();
 		let saml = dom
 			.select(&saml)
@@ -153,7 +147,7 @@ impl ILIAS {
 		let relay_state = dom.select(&relay_state).next().context("no relay state")?;
 		info!("Logging into ILIAS..");
 		this.client
-			.post("https://ilias.studium.kit.edu/Shibboleth.sso/SAML2/POST")
+			.post(post_url)
 			.form(&json!({
 				"SAMLResponse": saml.value().attr("value").context("no SAML value")?,
 				"RelayState": relay_state.value().attr("value").context("no RelayState value")?
@@ -183,9 +177,10 @@ impl ILIAS {
 		log!(2, "Downloading {}", url);
 		let url = if url.starts_with("http://") || url.starts_with("https://") {
 			url.to_owned()
-		} else if url.starts_with("ilias.studium.kit.edu") {
+		} else if url.starts_with("studon.fau.de") {
 			format!("https://{}", url)
 		} else {
+			log!(0, "BADDDDD");
 			format!("{}{}", ILIAS_URL, url)
 		};
 		for attempt in 1..10 {
@@ -413,7 +408,20 @@ impl Object {
 			return Ok(Thread { url });
 		}
 
-		if url.url.starts_with("https://ilias.studium.kit.edu/goto.php") {
+		// HACK rewrite urls like studon.fau.de/crs123.html to goto.php for the parsing below
+		if url.url.ends_with(".html") && !url.url.contains("/studon/") {
+			static LINK_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"www\.studon\.fau\.de.([a-z]+)([0-9]+)").unwrap());
+			let captures = LINK_REGEX.captures(url.url.as_str()).ok_or(anyhow!("rewrite error"))?;
+			let link_type = captures.get(1).unwrap().as_str();
+			let link_no = captures.get(2).unwrap().as_str();
+			let dl_suffix = if url.url.contains("download") { "_download" } else { "" };	
+			log!(2, "Rewriting {}", url.url);
+
+			url = URL::from_href(format!("https://studon.fau.de/studon/goto.php?target={}_{}{}", link_type, link_no, dl_suffix).as_str())?;
+			log!(2, "Rewrote {}", url.url);
+		}
+
+		if url.url.starts_with("https://studon.fau.de/studon/goto.php") {
 			let target = url.target.as_deref().unwrap_or("NONE");
 			if target.starts_with("wiki_") {
 				return Ok(Wiki {
@@ -470,6 +478,7 @@ impl Object {
 					});
 				}
 			}
+			log!(2, "{} classified as generic", url.url);
 			return Ok(Generic { name, url });
 		}
 
@@ -528,7 +537,7 @@ impl URL {
 	}
 
 	pub fn from_href(href: &str) -> Result<Self> {
-		let url = if !href.starts_with(ILIAS_URL) {
+		let url = if !href.starts_with("https://") {
 			Url::parse(&format!("{}{}", ILIAS_URL, href))?
 		} else {
 			Url::parse(href)?

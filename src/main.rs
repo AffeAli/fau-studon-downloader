@@ -15,9 +15,9 @@ use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::time::SystemTime;
 
-static ILIAS_URL: &str = "https://ilias.studium.kit.edu/";
+static ILIAS_URL: &str = "https://studon.fau.de/studon/";
 static DEFAULT_SYNC_URL: &str =
-	"https://ilias.studium.kit.edu/ilias.php?baseClass=ilDashboardGUI&cmd=jumpToMemberships";
+	"https://studon.fau.de/studon/ilias.php?baseClass=ilDashboardGUI&cmd=jumpToMemberships";
 
 #[macro_use]
 mod cli;
@@ -224,6 +224,7 @@ async fn handle_gracefully(fut: impl Future<Output = Result<()>>) {
 }
 
 async fn process(ilias: Arc<ILIAS>, path: PathBuf, obj: Object) -> Result<()> {
+	log!(1, "Processing {}", obj.url().url);
 	let relative_path = path.strip_prefix(&ilias.opt.output).unwrap();
 	if PROGRESS_BAR_ENABLED.load(Ordering::SeqCst) {
 		let path = relative_path.display().to_string();
@@ -236,8 +237,7 @@ async fn process(ilias: Arc<ILIAS>, path: PathBuf, obj: Object) -> Result<()> {
 		log!(1, "Ignored {}", relative_path.to_string_lossy());
 		return Ok(());
 	}
-	log!(1, "Syncing {} {}", obj.kind(), relative_path.to_string_lossy());
-	log!(2, " URL: {}", obj.url().url);
+	log!(1, "Syncing {} {} from {}", obj.kind(), relative_path.to_string_lossy(), obj.url().url);
 	if obj.is_ignored_by_option(&ilias.opt) {
 		return Ok(());
 	}
