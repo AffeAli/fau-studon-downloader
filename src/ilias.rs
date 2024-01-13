@@ -478,6 +478,9 @@ impl Object {
 					});
 				}
 			}
+			if target.starts_with("exc_") {
+				return Ok(ExerciseHandler { name, url });
+			}
 			log!(2, "{} classified as generic", url.url);
 			return Ok(Generic { name, url });
 		}
