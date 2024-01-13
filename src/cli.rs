@@ -83,7 +83,7 @@ pub struct Opt {
 	pub sync_url: Option<String>,
 
 	/// Requests per minute
-	#[structopt(long, default_value = "8")]
+	#[structopt(long, default_value = "16")]
 	pub rate: usize,
 
 	/// Attempt to re-use session cookies
